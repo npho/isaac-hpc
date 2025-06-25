@@ -1,0 +1,47 @@
+# isaac-sim.def by Nam Pho
+
+# https://catalog.ngc.nvidia.com/orgs/nvidia/collections/cuda_toolkit/artifacts
+
+### From scratch
+#Bootstrap: docker
+#From: nvcr.io/nvidia/cuda:{{ CONTAINER_TAG }}
+
+### From local container
+Bootstrap: localimage
+From: rocky9_cuda-12.9.1.sif
+
+%arguments
+    CONTAINER_TAG=12.9.1-cudnn-devel-rockylinux9
+    ISAAC_VERSION=4.5.0
+
+%labels
+    Author npho@uw.edu
+    Version 4.5.0
+
+%help
+    An Apptainer native implementation of Isaac Sim.
+
+%setup
+    if [ -f "isaac-sim_{{ ISAAC_VERSION }}.zip" ]; then
+        echo "Isaac Sim downloaded."
+    else
+        echo "Downloading Isaac Sim..."
+        curl -o isaac-sim_{{ ISAAC_VERSION }}.zip https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone%404.5.0-rc.36%2Brelease.19112.f59b3005.gl.linux-x86_64.release.zip
+    fi
+
+%files
+    isaac-sim_{{ ISAAC_VERSION }}.zip /tmp/isaac-sim_{{ ISAAC_VERSION }}.zip
+
+%post
+    # Install supporting packages
+    dnf clean all
+    #dnf install -y unzip
+    
+    # Install Isaac Sim
+    mkdir -p /opt/isaacsim/
+    #unzip /tmp/isaac-sim_{{ ISAAC_VERSION }}.zip -d /opt/isaacsim/
+    # /opt/isaacsim/post_install.sh
+    # /opt/isaacsim/isaac-sim.selector.sh
+    
+    # Clean up
+    dnf clean all
