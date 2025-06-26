@@ -55,12 +55,6 @@ From: rocky9_cuda-dev-12.9.1.sif
     uv pip install --torch-backend cu128 -r {{ SRC }}/requirements.txt
     source .venv/bin/activate
     
-    # Install Isaac Sim
-    #mkdir -p /opt/isaacsim/
-    #unzip -q {{ SRC }}/isaac-sim_{{ ISAAC_VERSION }}.zip -d /opt/isaacsim/
-    #/opt/isaacsim/post_install.sh
-    #/opt/isaacsim/isaac-sim.selector.sh
-    
     # Clean up
     rm -vfr {{ SRC }}/*
     dnf clean all
