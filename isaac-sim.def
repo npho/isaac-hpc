@@ -8,11 +8,12 @@
 
 ### From local container
 Bootstrap: localimage
-From: rocky9_cuda-12.9.1.sif
+From: rocky9_cuda-dev-12.9.1.sif
 
 %arguments
-    CONTAINER_TAG=12.9.1-cudnn-devel-rockylinux9
+    CONTAINER_TAG=12.9.1-devel-rockylinux9
     ISAAC_VERSION=4.5.0
+    SRC=/usr/local/src/
 
 %labels
     Author npho@uw.edu
@@ -30,40 +31,45 @@ From: rocky9_cuda-12.9.1.sif
     fi
 
 %files
-    isaac-sim_{{ ISAAC_VERSION }}.zip /tmp/isaac-sim_{{ ISAAC_VERSION }}.zip
-    requirements.txt /tmp/requirements.txt
+    requirements.txt {{ SRC }}
 
 %post
     # Install supporting packages
     dnf clean all
-    dnf install -y \
-    	unzip \
-	zsh
+    #dnf install -y \
+    #	unzip \
+    #	which \
+    #	zsh
 
     # Setup uv for Python stuff
     mkdir -p /opt/uv/bin/
     export UV_INSTALL_DIR=/opt/uv/bin/
     curl -LsSf https://astral.sh/uv/install.sh | sh
     export PATH=/opt/uv/bin/:${PATH}
-
+    
     # Python environment setup
-    uv python install
+    uv python install 3.10
     mkdir -p /opt/python/isaac
     cd /opt/python/isaac
-    uv venv --relocatable --torch-backend cu129 --prompt isaac
-    uv pip install -r /tmp/requirements.txt
-    source .venv/bin/activate
-    python -c "print('hello')"
 
+    export ACCEPT_EULA=Y
+    export OMNI_KIT_ACCEPT_EULA=YES
+    export UV_INDEX=https://pypi.nvidia.com
+    uv venv --relocatable --prompt isaac
+    uv pip install --torch-backend cu128 -r {{ SRC }}/requirements.txt
+    source .venv/bin/activate
+    
     # Install Isaac Sim
-    mkdir -p /opt/isaacsim/
-    unzip /tmp/isaac-sim_{{ ISAAC_VERSION }}.zip -d /opt/isaacsim/
-    /opt/isaacsim/post_install.sh
-    /opt/isaacsim/isaac-sim.selector.sh
+    #mkdir -p /opt/isaacsim/
+    #unzip -q {{ SRC }}/isaac-sim_{{ ISAAC_VERSION }}.zip -d /opt/isaacsim/
+    #/opt/isaacsim/post_install.sh
+    #/opt/isaacsim/isaac-sim.selector.sh
     
     # Clean up
+    rm -vfr {{ SRC }}/*
     dnf clean all
 
 %environment
+    export ACCEPT_EULA=Y
+    export OMNI_KIT_ACCEPT_EULA=YES
     export PATH=/opt/uv/bin/:${PATH}
-    

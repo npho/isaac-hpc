@@ -1,2 +1,4 @@
 pandas
 numpy
+isaacsim[all]==4.5.0
+isaacsim[extscache]==4.5.0
