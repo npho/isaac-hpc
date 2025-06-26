@@ -18,24 +18,33 @@ From: rocky9_cuda-dev-12.9.1.sif
 
 %labels
     Author npho@uw.edu
-    Version 4.5.0
+    Version {{ ISAAC_VERSION }}
 
 %help
     An Apptainer native implementation of Isaac Sim.
 
 %files
     requirements.txt {{ SRC }}
+    test.* /opt/
 
 %post
     # Install supporting packages
     dnf clean all
-    #dnf update -y
+    dnf update -y \
+    	glibc
     dnf install -y \
+    	glib2-devel \
+	libGLU \
     	libSM \
 	libXext \
 	libXrender \
+	libXtst \
+	mesa-libGL \
 	which \
+	zenity \
 	zsh
+
+    dnf -y update glibc # Isaac Sim 4.5.0 requires GLIBC 2.35+
 
     # Setup uv for Python stuff
     mkdir -p /opt/uv/bin/
@@ -44,7 +53,7 @@ From: rocky9_cuda-dev-12.9.1.sif
     export PATH=/opt/uv/bin/:${PATH}
     
     # Python environment setup
-    uv python install 3.10
+    uv python install 3.10 # Isaac Sim 4.5.0 requires Python 3.11
     mkdir -p /opt/python/isaac
     cd /opt/python/isaac
 

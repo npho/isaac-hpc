@@ -1,6 +1,10 @@
 pandas
 numpy
-isaacsim[all]==4.5.0
+isaacsim[all,extscache]==4.5.0
+
+isaacsim-extscache-physics
+isaacsim-extscache-kit
+isaacsim-extscache-kit-sdk
 
 isaacsim-kernel
 isaacsim-app
@@ -15,13 +19,9 @@ isaacsim-rl
 isaacsim-robot
 isaacsim-robot-motion
 isaacsim-robot-setup
+isaacsim-ros2
 isaacsim-sensor
 isaacsim-storage
 isaacsim-template
+isaacsim-test
 isaacsim-utils
-
-isaacsim[extscache]==4.5.0
-isaacsim-extscache-physics
-isaacsim-extscache-kit
-isaacsim-extscache-kit-sdk
-
