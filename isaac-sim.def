@@ -22,24 +22,17 @@ From: rocky9_cuda-dev-12.9.1.sif
 %help
     An Apptainer native implementation of Isaac Sim.
 
-%setup
-    if [ -f "isaac-sim_{{ ISAAC_VERSION }}.zip" ]; then
-        echo "Isaac Sim downloaded."
-    else
-        echo "Downloading Isaac Sim..."
-        curl -o isaac-sim_{{ ISAAC_VERSION }}.zip https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone%404.5.0-rc.36%2Brelease.19112.f59b3005.gl.linux-x86_64.release.zip
-    fi
-
 %files
     requirements.txt {{ SRC }}
 
 %post
     # Install supporting packages
     dnf clean all
-    #dnf install -y \
-    #	unzip \
-    #	which \
-    #	zsh
+    dnf install -y \ 
+   	libXext libSM libXrender \
+	mesa-libGL \
+    	which \
+    	zsh
 
     # Setup uv for Python stuff
     mkdir -p /opt/uv/bin/
