@@ -2,3 +2,6 @@ pandas
 numpy
 isaacsim[all]==4.5.0
 isaacsim[extscache]==4.5.0
+isaacsim-extscache-physics
+isaacsim-extscache-kit
+isaacsim-extscache-kit-sdk

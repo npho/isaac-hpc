@@ -9,6 +9,7 @@
 ### From local container
 Bootstrap: localimage
 From: rocky9_cuda-dev-12.9.1.sif
+#From: ubuntu22.04_cuda-dev-12.9.1.sif
 
 %arguments
     CONTAINER_TAG=12.9.1-devel-rockylinux9
@@ -28,11 +29,13 @@ From: rocky9_cuda-dev-12.9.1.sif
 %post
     # Install supporting packages
     dnf clean all
-    dnf install -y \ 
-   	libXext libSM libXrender \
-	mesa-libGL \
-    	which \
-    	zsh
+    #dnf update -y
+    dnf install -y \
+    	libSM \
+	libXext \
+	libXrender \
+	which \
+	zsh
 
     # Setup uv for Python stuff
     mkdir -p /opt/uv/bin/
@@ -61,6 +64,9 @@ From: rocky9_cuda-dev-12.9.1.sif
     # Clean up
     rm -vfr {{ SRC }}/*
     dnf clean all
+    #apt cache clean
+    #apt clean
+    #apt --purge autoremove
 
 %environment
     export ACCEPT_EULA=Y
