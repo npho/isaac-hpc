@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-python /opt/test-sim.py
+source /opt/python/isaac/.venv/bin/activate
+
+python /opt/sim.py
 

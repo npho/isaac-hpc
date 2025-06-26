@@ -79,7 +79,7 @@ From: rocky9_cuda-dev-12.8.1.sif
     #apt --purge autoremove
 
 %runscript
-    source /opt/python/.venv/bin/activate
+    source /opt/python/isaac/.venv/bin/activate
 
 %environment
     export ACCEPT_EULA=Y
