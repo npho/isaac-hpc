@@ -8,11 +8,11 @@
 
 ### From local container
 Bootstrap: localimage
-From: rocky9_cuda-dev-12.9.1.sif
+From: rocky9_cuda-dev-12.8.1.sif
 #From: ubuntu22.04_cuda-dev-12.9.1.sif
 
 %arguments
-    CONTAINER_TAG=12.9.1-devel-rockylinux9
+    CONTAINER_TAG=12.8.1-devel-rockylinux9
     ISAAC_VERSION=4.5.0
     SRC=/usr/local/src/
 
@@ -25,22 +25,29 @@ From: rocky9_cuda-dev-12.9.1.sif
 
 %files
     requirements.txt {{ SRC }}
-    test.* /opt/
+    test.py /opt/
 
 %post
     # Install supporting packages
     dnf clean all
     dnf update -y \
     	glibc
+	
+    #dnf config-manager --enable PowerTools
     dnf install -y \
     	glib2-devel \
 	libGLU \
     	libSM \
+	libX11 \
 	libXext \
 	libXrender \
+	libXt \
 	libXtst \
 	mesa-libGL \
 	which \
+	xorg-x11-server-Xorg \
+	xorg-x11-utils \
+	xorg-x11-xauth \
 	zenity \
 	zsh
 
@@ -70,6 +77,9 @@ From: rocky9_cuda-dev-12.9.1.sif
     #apt cache clean
     #apt clean
     #apt --purge autoremove
+
+%runscript
+    source /opt/python/.venv/bin/activate
 
 %environment
     export ACCEPT_EULA=Y
