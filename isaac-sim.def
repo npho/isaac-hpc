@@ -25,7 +25,7 @@ From: rocky9_cuda-dev-12.8.1.sif
 
 %files
     requirements.txt {{ SRC }}
-    test.py /opt/
+    test* /opt/
 
 %post
     # Install supporting packages
