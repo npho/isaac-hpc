@@ -1,20 +1,16 @@
 # isaac-sim.def by Nam Pho
 
-# https://catalog.ngc.nvidia.com/orgs/nvidia/collections/cuda_toolkit/artifacts
-
-### From scratch
-#Bootstrap: docker
-#From: nvcr.io/nvidia/cuda:{{ CONTAINER_TAG }}
-
 ### From local container
+
+# https://catalog.ngc.nvidia.com/orgs/nvidia/collections/cuda_toolkit/artifacts
+# apptainer pull rocky9_cuda-dev-12.8.1.sif docker://nvcr.io/nvidia/cuda:12.8.1-devel-rockylinux9
+
 Bootstrap: localimage
 From: rocky9_cuda-dev-12.8.1.sif
-#From: ubuntu22.04_cuda-dev-12.9.1.sif
 
 %arguments
-    CONTAINER_TAG=12.8.1-devel-rockylinux9
     ISAAC_VERSION=4.5.0
-    SRC=/usr/local/src/
+    SRC=/usr/local/src
 
 %labels
     Author npho@uw.edu
@@ -93,17 +89,15 @@ From: rocky9_cuda-dev-12.8.1.sif
        --index https://download.pytorch.org/whl/cu128 \
        --index https://pypi.nvidia.com \
        -r {{ SRC }}/requirements.txt
-    source .venv/bin/activate
+    #source .venv/bin/activate
     
     # Clean up
     rm -vfr {{ SRC }}/*
     dnf clean all
-    #apt cache clean
-    #apt clean
-    #apt --purge autoremove
 
 %runscript
-    source /opt/python/isaac/.venv/bin/activate
+    exec echo "$@"
+    exec source /opt/python/isaac/.venv/bin/activate
 
 %environment
     export ACCEPT_EULA=Y
