@@ -1,0 +1,10 @@
+### requirements.txt
+
+# General
+pandas
+numpy
+
+# PyTorch
+torch
+torchvision
+torchaudio
