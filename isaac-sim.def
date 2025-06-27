@@ -23,20 +23,30 @@ From: rocky9_cuda-dev-12.8.1.sif
 %help
     An Apptainer native implementation of Isaac Sim.
 
+%setup
+    if [ -f "vulkan.run" ]; then
+        echo "Vulkan drivers exist!"
+    else
+        echo "Downloading Vulkan drivers..."
+        # https://www.nvidia.com/en-us/drivers/details/247720/
+        curl -o vulkan.run https://us.download.nvidia.com/XFree86/Linux-x86_64/570.169/NVIDIA-Linux-x86_64-570.169.run
+    fi
+
 %files
     requirements.txt {{ SRC }}
-    test* /opt/
+    test.sh /opt/
+    sim.py /opt/
 
 %post
     # Install supporting packages
     dnf clean all
     dnf update -y \
     	glibc
-	
-    #dnf config-manager --enable PowerTools
+
     dnf install -y \
     	glib2-devel \
 	libGLU \
+	libglvnd-glx \
     	libSM \
 	libX11 \
 	libXext \
@@ -44,8 +54,12 @@ From: rocky9_cuda-dev-12.8.1.sif
 	libXt \
 	libXtst \
 	mesa-libGL \
+	mesa-vulkan-drivers \
+	vulkan-loader \
+	vulkan-tools \
 	which \
 	xorg-x11-server-Xorg \
+	xorg-x11-server-Xvfb \
 	xorg-x11-utils \
 	xorg-x11-xauth \
 	zenity \
@@ -58,7 +72,14 @@ From: rocky9_cuda-dev-12.8.1.sif
     export UV_INSTALL_DIR=/opt/uv/bin/
     curl -LsSf https://astral.sh/uv/install.sh | sh
     export PATH=/opt/uv/bin/:${PATH}
-    
+
+    # UV parameters
+    # https://docs.astral.sh/uv/reference/environment/
+    UV_CONCURRENT_DOWNLOADS=100
+    UV_CONCURRENT_BUILDS=100
+    UV_CONCURRENT_INSTALLS=100
+    UV_COMPILE_BYTECODE=True
+
     # Python environment setup
     uv python install 3.10 # Isaac Sim 4.5.0 requires Python 3.11
     mkdir -p /opt/python/isaac
@@ -66,9 +87,12 @@ From: rocky9_cuda-dev-12.8.1.sif
 
     export ACCEPT_EULA=Y
     export OMNI_KIT_ACCEPT_EULA=YES
-    export UV_INDEX=https://pypi.nvidia.com
     uv venv --relocatable --prompt isaac
-    uv pip install --torch-backend cu128 -r {{ SRC }}/requirements.txt
+    uv pip install \
+       --torch-backend cu128 \
+       --index https://download.pytorch.org/whl/cu128 \
+       --index https://pypi.nvidia.com \
+       -r {{ SRC }}/requirements.txt
     source .venv/bin/activate
     
     # Clean up
