@@ -1,5 +1,15 @@
+### requirements.txt
+
+# General
 pandas
 numpy
+
+# PyTorch
+torch
+torchvision
+torchaudio
+
+# Isaac Sim
 isaacsim[all,extscache]==4.5.0
 
 isaacsim-extscache-physics

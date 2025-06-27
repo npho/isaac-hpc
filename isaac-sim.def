@@ -8,6 +8,11 @@
 Bootstrap: localimage
 From: rocky9_cuda-dev-12.8.1.sif
 
+# Requires /etc/subuid to skip GPG check
+#Bootstrap: dnf
+#OSVersion: 8
+#MirrorURL: http://klone-head01/install/repos/$basearch/
+
 %arguments
     ISAAC_VERSION=4.5.0
     SRC=/usr/local/src
@@ -35,9 +40,8 @@ From: rocky9_cuda-dev-12.8.1.sif
 
 %post
     # Install supporting packages
-    dnf clean all
     dnf update -y \
-    	glibc
+    	glibc # Isaac Sim 4.5.0 requires GLIBC 2.35+
 
     dnf install -y \
     	glib2-devel \
@@ -61,8 +65,6 @@ From: rocky9_cuda-dev-12.8.1.sif
 	zenity \
 	zsh
 
-    dnf -y update glibc # Isaac Sim 4.5.0 requires GLIBC 2.35+
-
     # Setup uv for Python stuff
     mkdir -p /opt/uv/bin/
     export UV_INSTALL_DIR=/opt/uv/bin/
@@ -75,7 +77,7 @@ From: rocky9_cuda-dev-12.8.1.sif
     UV_CONCURRENT_BUILDS=100
     UV_CONCURRENT_INSTALLS=100
     UV_COMPILE_BYTECODE=True
-
+    
     # Python environment setup
     uv python install 3.10 # Isaac Sim 4.5.0 requires Python 3.11
     mkdir -p /opt/python/isaac
@@ -86,10 +88,10 @@ From: rocky9_cuda-dev-12.8.1.sif
     uv venv --relocatable --prompt isaac
     uv pip install \
        --torch-backend cu128 \
-       --index https://download.pytorch.org/whl/cu128 \
        --index https://pypi.nvidia.com \
+       --index https://download.pytorch.org/whl/cu128 \
        -r {{ SRC }}/requirements.txt
-    #source .venv/bin/activate
+    source .venv/bin/activate
     
     # Clean up
     rm -vfr {{ SRC }}/*
