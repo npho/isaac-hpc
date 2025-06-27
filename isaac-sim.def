@@ -3,15 +3,10 @@
 ### From local container
 
 # https://catalog.ngc.nvidia.com/orgs/nvidia/collections/cuda_toolkit/artifacts
-# apptainer pull rocky9_cuda-dev-12.8.1.sif docker://nvcr.io/nvidia/cuda:12.8.1-devel-rockylinux9
+# apptainer pull ubuntu22.04_cuda-dev-12.8.1.sif docker://nvcr.io/nvidia/cuda:12.8.1-devel-ubuntu22.04
 
 Bootstrap: localimage
-From: rocky9_cuda-dev-12.8.1.sif
-
-# Requires /etc/subuid to skip GPG check
-#Bootstrap: dnf
-#OSVersion: 8
-#MirrorURL: http://klone-head01/install/repos/$basearch/
+From: ubuntu22.04_cuda-dev-12.8.1.sif
 
 %arguments
     ISAAC_VERSION=4.5.0
@@ -25,6 +20,7 @@ From: rocky9_cuda-dev-12.8.1.sif
     An Apptainer native implementation of Isaac Sim.
 
 %setup
+    # Vulkan Drivers
     if [ -f "vulkan.run" ]; then
         echo "Vulkan drivers exist!"
     else
@@ -33,35 +29,35 @@ From: rocky9_cuda-dev-12.8.1.sif
         curl -o vulkan.run https://us.download.nvidia.com/XFree86/Linux-x86_64/570.169/NVIDIA-Linux-x86_64-570.169.run
     fi
 
+    # Isaac Sim
+    if [ -f "isaac-sim_{{ ISAAC_VERSION }}.zip" ]; then
+       echo "Isaac Sim exists!"
+    else
+	echo "Downloading Isaac Sim..."
+	curl -o isaac-sim_{{ ISAAC_VERSION }}.zip https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone%404.5.0-rc.36%2Brelease.19112.f59b3005.gl.linux-x86_64.release.zip
+    fi
+
 %files
-    requirements.txt {{ SRC }}
+    # Vulkan configuration
+    nvidia_icd.json /etc/vulkan/icd.d/
+    nvidia_layers.json /etc/vulkan/implicit_layer.d/
+
+    # Isaac and Python
+    requirements* {{ SRC }}
+    isaac-sim_{{ ISAAC_VERSION }}.zip {{ SRC }}
     test.sh /opt/
     sim.py /opt/
 
 %post
     # Install supporting packages
-    dnf update -y \
-    	glibc # Isaac Sim 4.5.0 requires GLIBC 2.35+
-
-    dnf install -y \
-    	glib2-devel \
-	libGLU \
-	libglvnd-glx \
-    	libSM \
-	libX11 \
-	libXext \
-	libXrender \
-	libXt \
-	libXtst \
-	mesa-libGL \
-	mesa-vulkan-drivers \
-	vulkan-loader \
-	vulkan-tools \
+    apt install \
+    	fglrx \
+	unzip \
 	which \
-	xorg-x11-server-Xorg \
-	xorg-x11-server-Xvfb \
-	xorg-x11-utils \
-	xorg-x11-xauth \
+	xauth \
+	xorg \
+	xserver-xorg-core \
+	xserver-xorg \
 	zenity \
 	zsh
 
@@ -88,14 +84,22 @@ From: rocky9_cuda-dev-12.8.1.sif
     uv venv --relocatable --prompt isaac
     uv pip install \
        --torch-backend cu128 \
-       --index https://pypi.nvidia.com \
        --index https://download.pytorch.org/whl/cu128 \
-       -r {{ SRC }}/requirements.txt
+       --index https://pypi.nvidia.com \
+       -r {{ SRC }}/requirements.txt #\
+       #-r {{ SRC }}/requirements-isaac.txt
     source .venv/bin/activate
-    
+
+    # Isaac Sim Install
+    mkdir /isaac-sim
+    unzip -q {{ SRC }}/isaac-sim_{{ ISAAC_VERSION }}.zip -d /isaac-sim
+    /isaac-sim/post_install.sh
+    #/isaac-sim/isaac-sim.selector.sh
+
     # Clean up
     rm -vfr {{ SRC }}/*
-    dnf clean all
+    apt clean
+    apt autoremove
 
 %runscript
     exec echo "$@"

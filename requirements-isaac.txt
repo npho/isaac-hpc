@@ -1,13 +1,4 @@
-### requirements.txt
-
-# General
-pandas
-numpy
-
-# PyTorch
-torch
-torchvision
-torchaudio
+### requirements-isaac.txt
 
 # Isaac Sim
 isaacsim[all,extscache]==4.5.0
