@@ -1,10 +1,67 @@
 # Isaac HPC
 
-Building an Apptainer native Isaac Sim (and Lab) container.
+Apptainer (Singularity) container build and runtime environment for NVIDIA [Isaac Sim](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/isaac-sim) and [Isaac Lab](https://isaac-sim.github.io/IsaacLab/) on HPC clusters.
 
-There are [Isaac Sim](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/isaac-sim) and [Isaac Lab](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/isaac-lab) Docker containers from [NGC](https://catalog.ngc.nvidia.com/orgs/nvidia/collections/cuda_toolkit/artifacts). The setup for these containers didn't seem intuitive when I looked and I thought I'd (maybe) learn something by going through the pain to set it up myself. Since moving Isaac Sim to PyPi the setup has been much easier and negates some of the initial motivation for this repo. However, there's still some value in setting up an environment around the core packages.
+Rather than relying on large monolithic NGC images, this repository builds a native Apptainer image on top of a CUDA base image, using [`uv`](https://docs.astral.sh/uv/) and PyPI/NVIDIA package indexes to manage dependencies cleanly and reproducibly.
 
-```
+## Key Stack
+
+- **Base Image:** `nvidia/cuda:12.1.1-runtime-ubuntu22.04`
+- **Python:** 3.11 (managed via `uv`)
+- **Core Packages:**
+  - `isaacsim==5.1.0`
+  - `isaaclab==2.3.2.post1`
+  - `torch==2.7.0` (CUDA 12.8 wheel index)
+  - `rsl-rl-lib`
+
+## Repository Structure
+
+- `isaac-sim.def`: Apptainer definition file configuring system packages, `uv`, and runtime environment.
+- `pyproject.toml`: Python dependency specifications and wheel indexes.
+- `uv.lock`: Frozen lockfile used by `uv sync` for reproducible container builds.
+- `sim.py`: Minimal headless simulation verification script.
+
+## Building the Container
+
+### 1. Pull the CUDA Base Image
+```bash
 apptainer pull cuda_12.1.1-runtime-ubuntu22.04.sif docker://nvidia/cuda:12.1.1-runtime-ubuntu22.04
+```
+
+### 2. Build the SIF Container
+The definition file copies `pyproject.toml` and `uv.lock` into the container and executes `uv sync --frozen`:
+
+```bash
 apptainer build isaac-sim.sif isaac-sim.def
+```
+
+> **Note:** If you modify dependencies in `pyproject.toml`, update `uv.lock` with `uv lock` before building.
+
+## Verification & Testing
+
+Run the container's built-in `%test` suite (verifies Python 3.11, PyTorch CUDA support, and core imports for `rsl_rl` and `isaacsim`):
+
+```bash
+apptainer test --nv isaac-sim.sif
+```
+
+## Usage
+
+Always pass `--nv` to enable NVIDIA GPU access inside the container.
+
+### Run Python Scripts
+The container runscript defaults to `python` within the virtual environment:
+
+```bash
+apptainer run --nv isaac-sim.sif sim.py
+```
+
+### Execute Commands
+```bash
+apptainer exec --nv isaac-sim.sif python -c "import isaaclab; print('Isaac Lab ready')"
+```
+
+### Interactive Shell
+```bash
+apptainer shell --nv isaac-sim.sif
 ```
