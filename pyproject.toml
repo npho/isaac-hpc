@@ -1,0 +1,31 @@
+[project]
+name = "robotics-isaaclab"
+version = "0.1.0"
+requires-python = "==3.11.*"
+dependencies = [
+    "torch==2.7.0",
+    "torchvision==0.22.0",
+    "isaacsim[all,extscache]==5.1.0",
+    "isaaclab[isaacsim,all]==2.3.2.post1",
+    "rsl-rl-lib",
+]
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+
+[tool.uv]
+python-preference = "only-managed"
+index-strategy = "unsafe-best-match"
+environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'"
+]
