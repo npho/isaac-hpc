@@ -3,15 +3,11 @@
 #Bootstrap: docker
 #From: nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
-# https://catalog.ngc.nvidia.com/orgs/nvidia/collections/cuda_toolkit/artifacts
-# apptainer pull cuda_12.1.1-runtime-ubuntu22.04.sif docker://nvidia/cuda:12.1.1-runtime-ubuntu22.04
-
 Bootstrap: localimage
 From: cuda_12.1.1-runtime-ubuntu22.04.sif
 
 %arguments
     ISAAC_VERSION=5.1.0
-    SRC=/usr/local/src
 
 %labels
     Author npho@uw.edu
@@ -21,20 +17,9 @@ From: cuda_12.1.1-runtime-ubuntu22.04.sif
     An Apptainer native implementation of Isaac Sim.
 
 %setup
-    # Vulkan Drivers
-    if [ -f "vulkan.run" ]; then
-        echo "Vulkan drivers exist!"
-    else
-        echo "Downloading Vulkan drivers..."
-        # https://www.nvidia.com/en-us/drivers/details/247720/
-        #curl -o vulkan.run https://us.download.nvidia.com/XFree86/Linux-x86_64/570.169/NVIDIA-Linux-x86_64-570.169.run
-    fi
+    # TODO
 
 %files
-    # Vulkan
-    #nvidia_icd.json /etc/vulkan/icd.d/
-    #nvidia_layers.json /etc/vulkan/implicit_layer.d/
-
     # Python
     pyproject.toml /workspace/pyproject.toml
     uv.lock /workspace/uv.lock
