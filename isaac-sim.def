@@ -1,25 +1,28 @@
 # isaac-sim.def
 
 #Bootstrap: docker
-#From: nvidia/cuda:12.1.1-runtime-ubuntu22.04
+#From: nvidia/cuda:12.8.2-runtime-ubuntu24.04
 
 Bootstrap: localimage
-From: cuda_12.1.1-runtime-ubuntu22.04.sif
+From: cuda_12.8.2-runtime-ubuntu24.04.sif
 
 %arguments
-    ISAAC_VERSION=5.1.0
+    ISAAC_VERSION=6.1.0
 
 %labels
     Author npho@uw.edu
     Version {{ ISAAC_VERSION }}
 
 %help
-    An Apptainer native implementation of Isaac Sim.
+    An Apptainer native implementation of Isaac Sim and Isaac Lab.
 
 %setup
     # TODO
 
 %files
+    # Vulkan
+    nvidia_icd.json /etc/vulkan/icd.d/nvidia_icd.json
+
     # Python
     pyproject.toml /workspace/pyproject.toml
     uv.lock /workspace/uv.lock
@@ -31,16 +34,17 @@ From: cuda_12.1.1-runtime-ubuntu22.04.sif
 
     apt update
     apt install -y \
-    	curl \
+        curl \
+        git \
         libgl1 \
-        libglib2.0-0 \
+        libglib2.0-0* \
         libvulkan1 \
         vulkan-tools \
         libx11-6 \
         libxrandr2 \
         libxinerama1 \
         libxcursor1 \
-	zsh
+        zsh
 
     # Setup uv for Python stuff
     export UV_INSTALL_DIR=/bin/
@@ -48,10 +52,11 @@ From: cuda_12.1.1-runtime-ubuntu22.04.sif
 
     # UV parameters
     # https://docs.astral.sh/uv/reference/environment/
-    UV_CONCURRENT_DOWNLOADS=100
-    UV_CONCURRENT_BUILDS=100
-    UV_CONCURRENT_INSTALLS=100
-    UV_COMPILE_BYTECODE=True
+    export UV_CONCURRENT_DOWNLOADS=100
+    export UV_CONCURRENT_BUILDS=100
+    export UV_CONCURRENT_INSTALLS=100
+    export UV_COMPILE_BYTECODE=True
+    export UV_LINK_MODE=copy
     
     # Python environment setup
     export ACCEPT_EULA=Y
@@ -89,20 +94,26 @@ From: cuda_12.1.1-runtime-ubuntu22.04.sif
 
     export ACCEPT_EULA=Y
     export OMNI_KIT_ACCEPT_EULA=YES
+    export OMNI_KIT_ALLOW_ROOT=1
+    export QT_X11_NO_MITSHM=1
+    export NVIDIA_VISIBLE_DEVICES=all
+    export NVIDIA_DRIVER_CAPABILITIES="compute,utility,graphics,display"
+    export VK_DRIVER_FILES="/etc/vulkan/icd.d/nvidia_icd.json"
     export VIRTUAL_ENV=/workspace/.venv
     export PATH=/workspace/.venv/bin:${PATH}
 
 %test
     export PATH=/workspace/.venv/bin:${PATH}
     export OMNI_KIT_ACCEPT_EULA=YES
+    export VK_DRIVER_FILES="/etc/vulkan/icd.d/nvidia_icd.json"
 
     # Setup %test to use /tmp for Omniverse loggers
     export HOME=/tmp
     export OMNI_USER_DATA_DIR=/tmp/nvidia/omniverse
     export OMNI_CACHE_DIR=/tmp/nvidia/cache
     
-    # 1. Verify Python version is 3.11
-    python -c "import sys; assert sys.version_info[:2] == (3, 11), f'Expected 3.11, got {sys.version}'"
+    # 1. Verify Python version is 3.12
+    python -c "import sys; assert sys.version_info[:2] == (3, 12), f'Expected 3.12, got {sys.version}'"
 
     # 2. Verify PyTorch is compiled with CUDA support
     python -c "import torch; assert torch.version.cuda is not None, 'PyTorch was not built with CUDA!'"
@@ -110,3 +121,4 @@ From: cuda_12.1.1-runtime-ubuntu22.04.sif
     # 3. Verify packages import cleanly
     python -c "import rsl_rl; print('[TEST] rsl-rl imported successfully')"
     python -c "import isaacsim; print('[TEST] Isaac Sim imported successfully')"
+    python -c "import isaaclab; print('[TEST] Isaac Lab imported successfully')"
