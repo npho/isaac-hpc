@@ -16,6 +16,7 @@ Rather than relying on large monolithic NGC images, this repository builds a nat
 
 ## Repository Structure
 
+- `Makefile`: Convenient automation targets (`make pull-base`, `make build`, `make test`, etc.).
 - `isaac-sim.def`: Apptainer definition file configuring system packages, `uv`, and runtime environment.
 - `nvidia_icd.json`: NVIDIA Vulkan ICD configuration for headless and off-screen GPU rendering.
 - `pyproject.toml`: Python dependency specifications and wheel indexes.
@@ -23,6 +24,14 @@ Rather than relying on large monolithic NGC images, this repository builds a nat
 - `sim.py`: Minimal headless simulation verification script.
 
 ## Building the Container
+
+You can use `make` for automated builds (pulls the base CUDA image automatically if not present):
+
+```bash
+make build
+```
+
+Alternatively, you can run the steps manually:
 
 ### 1. Pull the CUDA Base Image
 ```bash
@@ -36,7 +45,7 @@ The definition file copies `pyproject.toml` and `uv.lock` into the container and
 apptainer build isaac-sim.sif isaac-sim.def
 ```
 
-> **Note:** If you modify dependencies in `pyproject.toml`, update `uv.lock` with `uv lock` before building.
+> **Note:** If you modify dependencies in `pyproject.toml`, update `uv.lock` with `make lock` (or `uv lock`) before building.
 
 ## Verification & Testing
 

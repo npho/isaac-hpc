@@ -19,6 +19,7 @@ This repository provides an Apptainer (Singularity) recipe and configuration to 
 
 ```
 ├── AGENTS.md           # Instructions for AI agents (this file)
+├── Makefile            # Automation targets (pull-base, build, lock, test, run)
 ├── README.md           # User-facing repository overview and quickstart
 ├── isaac-sim.def       # Apptainer definition file (build recipe)
 ├── nvidia_icd.json     # NVIDIA Vulkan ICD mapping for headless/offscreen rendering
@@ -50,15 +51,19 @@ This repository provides an Apptainer (Singularity) recipe and configuration to 
 
 ### A. Modifying Dependencies
 1. Edit `pyproject.toml` to add, update, or remove packages.
-2. Update the lockfile using `uv`:
+2. Update the lockfile using `uv` (or `make lock`):
    ```bash
-   uv lock
+   make lock
    ```
 3. Commit both `pyproject.toml` and `uv.lock`. Never modify `uv.lock` by hand.
 
 ### B. Building the Container Image
-The container build requires the base CUDA SIF image pulled first:
+The container build requires the base CUDA SIF image pulled first (or run `make build` which handles both):
 ```bash
+# Automated build (pulls base if missing, then builds target)
+make build
+
+# Or manually:
 # 1. Pull the base CUDA runtime image (if not already cached locally)
 apptainer pull cuda_12.8.2-runtime-ubuntu24.04.sif docker://nvidia/cuda:12.8.2-runtime-ubuntu24.04
 
