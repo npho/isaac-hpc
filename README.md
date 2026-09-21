@@ -6,17 +6,18 @@ Rather than relying on large monolithic NGC images, this repository builds a nat
 
 ## Key Stack
 
-- **Base Image:** `nvidia/cuda:12.1.1-runtime-ubuntu22.04`
-- **Python:** 3.11 (managed via `uv`)
+- **Base Image:** `nvidia/cuda:12.8.2-runtime-ubuntu24.04`
+- **Python:** 3.12 (managed via `uv`)
 - **Core Packages:**
-  - `isaacsim==5.1.0`
-  - `isaaclab==2.3.2.post1`
-  - `torch==2.7.0` (CUDA 12.8 wheel index)
+  - `isaacsim==6.1.0.0`
+  - `isaaclab>=3.0.0rc1`
+  - `torch==2.11.0` (CUDA 12.8 wheel index)
   - `rsl-rl-lib`
 
 ## Repository Structure
 
 - `isaac-sim.def`: Apptainer definition file configuring system packages, `uv`, and runtime environment.
+- `nvidia_icd.json`: NVIDIA Vulkan ICD configuration for headless and off-screen GPU rendering.
 - `pyproject.toml`: Python dependency specifications and wheel indexes.
 - `uv.lock`: Frozen lockfile used by `uv sync` for reproducible container builds.
 - `sim.py`: Minimal headless simulation verification script.
@@ -25,7 +26,7 @@ Rather than relying on large monolithic NGC images, this repository builds a nat
 
 ### 1. Pull the CUDA Base Image
 ```bash
-apptainer pull cuda_12.1.1-runtime-ubuntu22.04.sif docker://nvidia/cuda:12.1.1-runtime-ubuntu22.04
+apptainer pull cuda_12.8.2-runtime-ubuntu24.04.sif docker://nvidia/cuda:12.8.2-runtime-ubuntu24.04
 ```
 
 ### 2. Build the SIF Container
@@ -39,7 +40,7 @@ apptainer build isaac-sim.sif isaac-sim.def
 
 ## Verification & Testing
 
-Run the container's built-in `%test` suite (verifies Python 3.11, PyTorch CUDA support, and core imports for `rsl_rl` and `isaacsim`):
+Run the container's built-in `%test` suite (verifies Python 3.12, PyTorch CUDA support, and core imports for `rsl_rl`, `isaacsim`, and `isaaclab`):
 
 ```bash
 apptainer test --nv isaac-sim.sif

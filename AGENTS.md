@@ -6,7 +6,7 @@ Guidance and context for agentic AI models collaborating on the **Isaac HPC** re
 
 ## 1. Project Context & Purpose
 
-This repository provides an Apptainer (Singularity) recipe and configuration to build and run NVIDIA **Isaac Sim (5.1.0)** and **Isaac Lab (2.3.2)** in High-Performance Computing (HPC) environments.
+This repository provides an Apptainer (Singularity) recipe and configuration to build and run NVIDIA **Isaac Sim (6.1.0)** and **Isaac Lab (3.0 / 6.x)** in High-Performance Computing (HPC) environments.
 
 ### Core Philosophy
 - **Native Apptainer:** Build directly from an official CUDA base image rather than relying on bloated monolithic Docker images from NGC.
@@ -21,6 +21,7 @@ This repository provides an Apptainer (Singularity) recipe and configuration to 
 ├── AGENTS.md           # Instructions for AI agents (this file)
 ├── README.md           # User-facing repository overview and quickstart
 ├── isaac-sim.def       # Apptainer definition file (build recipe)
+├── nvidia_icd.json     # NVIDIA Vulkan ICD mapping for headless/offscreen rendering
 ├── pyproject.toml      # Dependency specifications and wheel index sources
 ├── uv.lock             # Deterministic dependency lockfile
 ├── sim.py              # Minimal headless simulation test script
@@ -35,13 +36,13 @@ This repository provides an Apptainer (Singularity) recipe and configuration to 
 ## 3. Technology Stack & Key Versions
 
 - **Host Requirements:** Linux (x86_64), Apptainer / Singularity with NVIDIA GPU drivers.
-- **Base Container Image:** `nvidia/cuda:12.1.1-runtime-ubuntu22.04` (requires Ubuntu 22.04+ / GLIBC 2.35+ for Isaac Sim 5.x).
-- **Python Version:** Python 3.11 (`requires-python = "==3.11.*"` pinned in `pyproject.toml`).
+- **Base Container Image:** `nvidia/cuda:12.8.2-runtime-ubuntu24.04` (Ubuntu 24.04+ / GLIBC 2.39+ for Isaac Sim 6.x).
+- **Python Version:** Python 3.12 (`requires-python = "==3.12.*"` pinned in `pyproject.toml`).
 - **Core Python Packages:**
-  - `torch==2.7.0` & `torchvision==0.22.0` (from PyTorch CUDA 12.8 index)
-  - `isaacsim[all,extscache]==5.1.0` (from NVIDIA PyPI index)
-  - `isaaclab[isaacsim,all]==2.3.2.post1`
-  - `rsl-rl-lib`
+  - `torch==2.11.0` & `torchvision==0.26.0` (from PyTorch CUDA 12.8 index)
+  - `isaacsim[all,extscache]==6.1.0.0` (from NVIDIA PyPI index)
+  - `isaaclab>=3.0.0rc1`
+  - `rsl-rl-lib==5.4.1`
 
 ---
 
@@ -59,7 +60,7 @@ This repository provides an Apptainer (Singularity) recipe and configuration to 
 The container build requires the base CUDA SIF image pulled first:
 ```bash
 # 1. Pull the base CUDA runtime image (if not already cached locally)
-apptainer pull cuda_12.1.1-runtime-ubuntu22.04.sif docker://nvidia/cuda:12.1.1-runtime-ubuntu22.04
+apptainer pull cuda_12.8.2-runtime-ubuntu24.04.sif docker://nvidia/cuda:12.8.2-runtime-ubuntu24.04
 
 # 2. Build the target container
 apptainer build isaac-sim.sif isaac-sim.def
@@ -73,9 +74,9 @@ Verify container integrity via its `%test` block:
 apptainer test --nv isaac-sim.sif
 ```
 This checks:
-1. Python version is strictly 3.11.
+1. Python version is strictly 3.12.
 2. PyTorch recognizes CUDA.
-3. Core imports (`rsl_rl`, `isaacsim`) load without error.
+3. Core imports (`rsl_rl`, `isaacsim`, `isaaclab`) load without error.
 
 Run a headless simulation test:
 ```bash
