@@ -88,6 +88,13 @@ Run a headless simulation test:
 apptainer run --nv isaac-sim.sif sim.py
 ```
 
+### D. Bootstrapping Downstream Projects
+When helping users build or integrate new robotics projects with this container:
+1. **Container-level dependencies:** Add packages to `pyproject.toml`, update `uv.lock` via `make lock`, and rebuild using `make build`.
+2. **Active development (bind-mount):** Recommend running host directories via `-B /path/to/project:/workspace/project` rather than rebuilding containers for every code iteration.
+3. **Derived containers:** For downstream labs needing extra system/Python packages, recommend using `isaac-sim.sif` as a base (`Bootstrap: localimage`, `From: isaac-sim.sif`).
+4. **Source tree hook:** To bake custom code directly, place it in `src/` (with a `pyproject.toml`) and uncomment `/workspace/src` in `isaac-sim.def`.
+
 ---
 
 ## 5. Agent Guidelines & Guardrails
