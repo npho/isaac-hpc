@@ -48,7 +48,6 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
 
     # Setup uv for Python stuff
     export UV_INSTALL_DIR=/bin/
-    export UV_NO_MODIFY_PATH=1
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
     # UV parameters
