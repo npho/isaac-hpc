@@ -26,7 +26,6 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
     # Python
     pyproject.toml /workspace/pyproject.toml
     uv.lock /workspace/uv.lock
-    #. /workspace/src
 
 %post
     # Install supporting packages
