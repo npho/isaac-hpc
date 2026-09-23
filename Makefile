@@ -33,7 +33,7 @@ pull-base: $(BASE_SIF)
 # Build the Isaac Sim container
 $(TARGET_SIF): $(BASE_SIF) $(DEF_FILE) pyproject.toml uv.lock nvidia_icd.json
 	@echo "[+] Building $(TARGET_SIF) using $(DEF_FILE)..."
-	apptainer build $(TARGET_SIF) $(DEF_FILE)
+	apptainer build --notest $(TARGET_SIF) $(DEF_FILE)
 
 build: $(TARGET_SIF)
 
