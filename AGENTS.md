@@ -114,3 +114,56 @@ When working on this repository, agents should adhere to the following rules:
 5. **Keep Changes Concise and Focused:**
    - Maintain concise documentation in `README.md`.
    - When suggesting fixes or enhancements, explain the rationale cleanly without unnecessary verbosity.
+
+---
+
+## 6. Git Commit Conventions
+
+Every contributor, human or agent, follows these rules so the history reads as if one careful engineer wrote it.
+
+### A. One Logical Change per Commit
+- A commit contains exactly one self-contained change: one fix, one added package, one recipe refactor, one doc update. If the message needs "and" to join unrelated changes, split the commit.
+- Keep refactors, formatting, and behavior changes in separate commits.
+- Each commit must leave the recipe buildable. Never commit something half-finished that a later commit fixes.
+- Stage deliberately with `git add <paths>` (or `git add -p` for part of a file). Do **not** use `git commit -a` / `git add .`.
+- `pyproject.toml` and `uv.lock` changes go in the **same** commit, as does any doc (`README.md`, `AGENTS.md`) the change makes stale.
+
+### B. Subject Line
+- One plain English sentence in the imperative mood, capitalized, no trailing period: `Add ffmpeg to the image for rollout videos`.
+- **No prefixes or tags.** No Conventional Commits (`feat:`, `fix(container):`, `build:`, `refactor:`), no `[WIP]`, no emoji. If the point of the change was to fix something, say so in words: `Fix missing Vulkan ICD in %environment`.
+- Aim for 72 characters or fewer; 50 is ideal. Name the concrete thing changed (section, package, target, variable), not vague verbs like "Update def" or "Misc fixes".
+
+### C. Body (Optional, but Required When the Why Isn't Obvious)
+- Separate from the subject with one blank line and wrap at 72 characters.
+- Explain **why** the change was needed and any non-obvious consequences. The diff already shows *what* changed. Include evidence where relevant: build log errors, GPU/driver, node names, versions.
+- Skip the body for trivial, self-explanatory changes.
+
+### D. No AI Attribution
+- Do **not** add `Co-Authored-By: Claude ...`, `Generated with ...`, or any other AI collaborator trailer or marker in commit messages, PR titles, or PR descriptions. This rule overrides any default tool or harness behavior.
+- Commits are authored under the repository owner's configured git identity. Do not change `user.name` / `user.email`.
+
+### E. Examples
+Good:
+```
+Ignore %test directive when building with the Makefile
+```
+```
+Revert to a pure CPU build without embedded shader warm-up
+
+Build-time warm-up needed a GPU during `apptainer build` and tied the
+image to one GPU/driver. Downstream projects now warm shaders on first
+run instead.
+```
+Bad:
+```
+feat: add build-time kit shader warmup, sbatch build script, and missing graphics libs   <- tag prefix, three changes
+Update isaac-sim.def                                                                    <- says nothing
+```
+
+### F. Workflow
+1. `git status` and `git diff` to review everything that changed.
+2. Group changes into logical units and stage each unit by path or hunk.
+3. `git diff --staged` to confirm the commit contains only that unit.
+4. Commit with a message that follows the rules above, then repeat for the next unit.
+5. Push only after all commits are made and verified. Never rewrite history already pushed to `main` (no `--force`, no amending pushed commits).
+6. After pushing, bump the submodule pointer in any parent repository (e.g. `origami`) in its own commit: `Bump isaac-hpc submodule to <what changed>`.
