@@ -17,7 +17,18 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
     An Apptainer native implementation of Isaac Sim and Isaac Lab.
 
 %setup
-    # TODO
+    # `build --nv` runs %post writable, where --nv only binds onto paths that already exist.
+    # Empty placeholders so the host's driver data files are bound during the shader warm-up;
+    # headless Vulkan fails (ERROR_INCOMPATIBLE_DRIVER) without the glvnd EGL vendor file.
+    # At runtime --nv overlays these as usual.
+    for f in \
+        /usr/share/glvnd/egl_vendor.d/10_nvidia.json \
+        /usr/share/egl/egl_external_platform.d/15_nvidia_gbm.json \
+        /usr/share/vulkan/implicit_layer.d/nvidia_layers.json \
+        /usr/share/nvidia/nvoptix.bin; do
+        mkdir -p "$(dirname "${APPTAINER_ROOTFS}${f}")"
+        touch "${APPTAINER_ROOTFS}${f}"
+    done
 
 %files
     # Vulkan
@@ -26,6 +37,9 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
     # Python
     pyproject.toml /workspace/pyproject.toml
     uv.lock /workspace/uv.lock
+
+    # Build-time shader cache warm-up (removed after use)
+    warmup_shaders.py /workspace/warmup_shaders.py
 
 %post
     # Install supporting packages
@@ -36,6 +50,8 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
         curl \
         ffmpeg \
         git \
+        libatomic1 \
+        libegl1 \
         libgl1 \
         libglib2.0-0* \
         libvulkan1 \
@@ -44,6 +60,12 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
         libxrandr2 \
         libxinerama1 \
         libxcursor1 \
+        libgomp1 \
+        libice6 \
+        libquadmath0 \
+        libsm6 \
+        libxt6t64 \
+        libxtst6 \
         zsh
 
     # Setup uv for Python stuff
@@ -68,6 +90,54 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
 
     # Synchronize packages from frozen lockfile
     uv sync --frozen --no-dev --compile-bytecode
+
+    # Bake the Kit/RTX shader cache (needs a GPU: apptainer build --nv, see sbatch_build.sh).
+    # Kit writes its cache under ${KIT_DIR}/cache and data, which are read-only at runtime,
+    # so the result is moved to /workspace/baked_kit_cache for jobs to seed a writable copy.
+    # The driver-level cache is keyed to driver version + GPU; a mismatch just recompiles.
+    KIT_DIR="/workspace/.venv/lib/python3.12/site-packages/isaacsim/kit"
+    BAKED=/workspace/baked_kit_cache
+    mkdir -p "${KIT_DIR}/cache" "${KIT_DIR}/data" "${KIT_DIR}/logs" "${BAKED}"
+    # nvidia-smi is not bound in a writable build, so detect the GPU via device node + driver libs
+    if [ -e /dev/nvidiactl ] && [ -e /.singularity.d/libs/libcuda.so.1 ]; then
+        GPU_MODEL="$(cat /proc/driver/nvidia/gpus/*/information 2>/dev/null | sed -n 's/^Model:[[:space:]]*//p' | head -1)"
+        DRIVER_VERSION="$(grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' /proc/driver/nvidia/version 2>/dev/null | head -1)"
+        DRIVER_INFO="${GPU_MODEL:-unknown}, ${DRIVER_VERSION:-unknown}"
+        echo "[bake] GPU visible: ${DRIVER_INFO}"
+        WARMUP_TMP="$(mktemp -d)"
+        mkdir -p "${WARMUP_TMP}/nvidia/omniverse" "${WARMUP_TMP}/nvidia/cache" "${WARMUP_TMP}/nvidia/logs"
+        if ! VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json vulkaninfo --summary >/dev/null 2>&1; then
+            echo "[bake] ERROR: Vulkan instance creation failed:" >&2
+            VK_LOADER_DEBUG=error,driver VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json vulkaninfo --summary 2>&1 | tail -20 >&2
+            exit 1
+        fi
+        echo "[bake] Vulkan OK"
+        if ! env \
+            HOME="${WARMUP_TMP}" \
+            XDG_RUNTIME_DIR="${WARMUP_TMP}" \
+            OMNI_USER_DATA_DIR="${WARMUP_TMP}/nvidia/omniverse" \
+            OMNI_CACHE_DIR="${WARMUP_TMP}/nvidia/cache" \
+            OMNI_LOG_DIR="${WARMUP_TMP}/nvidia/logs" \
+            OMNI_KIT_ALLOW_ROOT=1 \
+            VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json \
+            LD_LIBRARY_PATH="/.singularity.d/libs:${LD_LIBRARY_PATH:-}" \
+            /workspace/.venv/bin/python /workspace/warmup_shaders.py; then
+            echo "[bake] ERROR: shader warm-up failed" >&2
+            exit 1
+        fi
+        echo "[bake] Shader cache locations after warm-up:"
+        find "${KIT_DIR}" "${WARMUP_TMP}" -type d \( -name shadercache -o -name nv_shadercache \) -exec du -sh {} + || true
+        echo "${DRIVER_INFO}" > "${BAKED}/DRIVER"
+        mv "${KIT_DIR}/cache" "${BAKED}/cache"
+        mv "${KIT_DIR}/data" "${BAKED}/data"
+        rm -rf "${BAKED}"/cache/DerivedDataCache/app_instance_lock* "${KIT_DIR}/logs"/* "${WARMUP_TMP}"
+        mkdir -p "${KIT_DIR}/cache" "${KIT_DIR}/data"
+        du -sh "${BAKED}"
+    else
+        echo "[bake] WARNING: no GPU visible during build; skipping shader warm-up (build with --nv on a GPU node)"
+    fi
+    rm -f /workspace/warmup_shaders.py
+    chmod -R 777 "${KIT_DIR}/cache" "${KIT_DIR}/data" "${KIT_DIR}/logs" "${BAKED}"
 
     # Project specific code dependencies
     if [ -f "/workspace/src/pyproject.toml" ]; then
