@@ -34,6 +34,7 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
     apt update
     apt install -y \
         curl \
+        ffmpeg \
         git \
         libgl1 \
         libglib2.0-0* \
@@ -111,6 +112,9 @@ From: cuda_12.8.2-runtime-ubuntu24.04.sif
     export OMNI_USER_DATA_DIR=/tmp/nvidia/omniverse
     export OMNI_CACHE_DIR=/tmp/nvidia/cache
     
+    # Verify FFmpeg is available
+    ffmpeg -version >/dev/null
+
     # 1. Verify Python version is 3.12
     python -c "import sys; assert sys.version_info[:2] == (3, 12), f'Expected 3.12, got {sys.version}'"
 
