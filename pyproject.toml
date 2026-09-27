@@ -9,6 +9,11 @@ dependencies = [
     "isaaclab>=3.0.0rc1",
     "rsl-rl-lib",
     "rerun-sdk==0.31.4",
+    "pandas==3.0.6",
+    "termcolor==3.3.0",
+    "lazy_import==0.2.2",
+    "lightwheel_sdk==1.0.3",
+    "six==1.17.0",
 ]
 
 [[tool.uv.index]]

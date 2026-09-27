@@ -1765,6 +1765,15 @@ wheels = [
 ]
 
 [[package]]
+name = "lazy-import"
+version = "0.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/44/2e/5378f9b9cbc893826c2ecb022646c97ece9efbaad351adf89425fff33990/lazy_import-0.2.2.tar.gz", hash = "sha256:2149aef8579459407c62cfeccf118527939c9931ace124f355236360644f8a3d", size = 15265, upload-time = "2018-01-22T02:19:32.029Z" }
+
+[[package]]
 name = "lazy-loader"
 version = "0.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1805,6 +1814,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/39/28/1b46cc98bba7411a57cb20c7a7c2fdf959dceb31d2c5131a29bd3fc649e9/libpinocchio-4.1.0.tar.gz", hash = "sha256:968bb7dff8aa7c25b1f879c0d9808b3e7686a1140eeb6372c003aba0d423772e", size = 4441987, upload-time = "2026-07-08T12:53:02.806Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8d/e4/7985df544d60d7b1b569834d8dcfbc469de37e6e3fae4a6510d77653bf72/libpinocchio-4.1.0-0-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:dbcc81e9e302ae57700775af0b86ed353effe47b5d33fa12aff9936ac33c0ae0", size = 3823272, upload-time = "2026-07-08T12:53:00.864Z" },
+]
+
+[[package]]
+name = "lightwheel-sdk"
+version = "1.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "pyyaml", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "requests", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "termcolor", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "tqdm", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/21/e3/68448f351bea9e1412bf13b62aa69eaf67ce652fd99a4aeafa4a5da3e1fb/lightwheel_sdk-1.0.3-py3-none-any.whl", hash = "sha256:841ec064ab21a403de024e1e860541e9949e0ea2330d51961b1fdf49d0ec21cd", size = 523246, upload-time = "2026-04-01T12:32:52.979Z" },
 ]
 
 [[package]]
@@ -2413,6 +2437,21 @@ wheels = [
 ]
 
 [[package]]
+name = "pandas"
+version = "3.0.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "python-dateutil", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/17/d7b106e05bfa642e8694451e7d3d759c6a241c5386a5d962e4f66c047e06/pandas-3.0.6.tar.gz", hash = "sha256:66b07ef7315a31bfe1089cd3d71a7de781c9dca986762d0b4fe7c0ef17465d10", size = 4667686, upload-time = "2026-09-17T23:23:18.345Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/67/0c0f18e38d7f2d2af8c24b3315bc4046e73bbdd4a5540405506671ad0c0d/pandas-3.0.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0704044b676496b8350e023b09f174a26772456c974a2b11c36bebb558c9490d", size = 10788193, upload-time = "2026-09-17T23:20:58.617Z" },
+    { url = "https://files.pythonhosted.org/packages/f2/d2/b1182e8d39100369d7f13f4a125a3fb6b096fef112c46d0566c25781ff68/pandas-3.0.6-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:569e114072b24fc4970c12e2b4bab252671668a40b324318903380cab0254c0c", size = 11838173, upload-time = "2026-09-17T23:21:04.85Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/33/5b717af24d2f27995e51e0875a269dddd373045216e34cf62e3aa764eaa1/pandas-3.0.6-cp312-cp312-pyemscripten_2024_0_wasm32.whl", hash = "sha256:2a8fc94be2ee5f1d86f97aacd8cc566f81680b6498e76f3007421bb5d98151bf", size = 7118499, upload-time = "2026-09-17T23:21:07.661Z" },
+]
+
+[[package]]
 name = "parso"
 version = "0.8.7"
 source = { registry = "https://pypi.org/simple" }
@@ -2957,8 +2996,13 @@ source = { virtual = "." }
 dependencies = [
     { name = "isaaclab", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "isaacsim", extra = ["all", "extscache"], marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "lazy-import", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "lightwheel-sdk", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "pandas", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "rerun-sdk", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "rsl-rl-lib", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "six", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "termcolor", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "torch", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "torchvision", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
@@ -2967,8 +3011,13 @@ dependencies = [
 requires-dist = [
     { name = "isaaclab", specifier = ">=3.0.0rc1" },
     { name = "isaacsim", extras = ["all", "extscache"], specifier = "==6.1.0.0" },
+    { name = "lazy-import", specifier = "==0.2.2" },
+    { name = "lightwheel-sdk", specifier = "==1.0.3" },
+    { name = "pandas", specifier = "==3.0.6" },
     { name = "rerun-sdk", specifier = "==0.31.4" },
     { name = "rsl-rl-lib" },
+    { name = "six", specifier = "==1.17.0" },
+    { name = "termcolor", specifier = "==3.3.0" },
     { name = "torch", specifier = "==2.11.0", index = "https://download.pytorch.org/whl/cu128" },
     { name = "torchvision", specifier = "==0.26.0", index = "https://download.pytorch.org/whl/cu128" },
 ]
@@ -3192,6 +3241,15 @@ dependencies = [
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bc/e6/a58bfc3290322b92805f544e5cad860a9b68245752313a3c2908a847417f/tensordict-0.14.2-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:0a748755bfb35db40123bcda67bfebac0138283d25deda76fe30be58ce10c247", size = 595446, upload-time = "2026-09-09T19:58:00.61Z" },
+]
+
+[[package]]
+name = "termcolor"
+version = "3.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/79/cf31d7a93a8fdc6aa0fbb665be84426a8c5a557d9240b6239e9e11e35fc5/termcolor-3.3.0.tar.gz", hash = "sha256:348871ca648ec6a9a983a13ab626c0acce02f515b9e1983332b17af7979521c5", size = 14434, upload-time = "2025-12-29T12:55:21.882Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/33/d1/8bb87d21e9aeb323cc03034f5eaf2c8f69841e40e4853c2627edf8111ed3/termcolor-3.3.0-py3-none-any.whl", hash = "sha256:cf642efadaf0a8ebbbf4bc7a31cec2f9b5f21a9f726f4ccbb08192c9c26f43a5", size = 7734, upload-time = "2025-12-29T12:55:20.718Z" },
 ]
 
 [[package]]
